@@ -291,6 +291,7 @@ import org.spongepowered.api.entity.living.player.User;
 							actualowner = "Unowned";
 						}
 						String worldname = player.getWorld().getName();
+						//just a comment
 						//System.out.println("Getting the plot id and shit");
 			    		HashSet<UUID> trusted = PlotPlayer.wrap(player).getCurrentPlot().getTrusted();
 			    		com.google.common.base.Optional<String> description = PlotPlayer.wrap(player).getCurrentPlot().getFlag(Flags.DESCRIPTION);
