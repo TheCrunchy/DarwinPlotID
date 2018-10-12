@@ -1,0 +1,13 @@
+[
+    {
+        "modid": "plotidbossbar",
+        "name": "Darwin PlotID boss bar",
+        "version": "1.0",
+        "dependencies": [
+            "spongeapi@7.1.0-SNAPSHOT"
+        ],
+        "requiredMods": [
+            "spongeapi@7.1.0-SNAPSHOT"
+        ]
+    }
+]
