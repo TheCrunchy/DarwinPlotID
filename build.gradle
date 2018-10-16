@@ -13,10 +13,10 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-    maven { url "http://ci.athion.net/job/PlotSquared/ws/mvn/" }
     maven { url "https://mvnrepository.com/artifact/org.projectlombok/lombok" }
     maven { url "http://repo.spongepowered.org/maven" }
     maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "http://ci.athion.net/job/PlotSquared/ws/mvn/" }
 	maven { url = "http://maven.sk89q.com/repo"	}
 } 
 dependencies {
@@ -24,7 +24,6 @@ dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version:'1.18.0'
     compile "org.spongepowered:spongeapi:7.1.0-SNAPSHOT"
     compile "com.plotsquared:plotsquared-api:latest"
-    compile files('libs/PlotSquared.jar')
 	compileOnly ("com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT") {
         transitive = false
     }
