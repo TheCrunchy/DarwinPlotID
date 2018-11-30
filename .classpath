@@ -3,8 +3,7 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
-	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/sponge/other plugins/PlotSquared-Sponge-18.08.23-f5a981f-2037.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/spongeapi-7.1.0-20180820.174752-54-shaded.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Cameron/eclipse-workspace/DarwinPlotID/build/libs/PersonalTime.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/PlotSquared-Sponge-18.07.27-cd9d22c-2026 (1).jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
