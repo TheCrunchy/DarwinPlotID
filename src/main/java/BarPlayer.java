@@ -25,7 +25,10 @@ public class BarPlayer {
 	
 	private boolean BarBool = false;
 	private boolean MembersBool = false;
-	
+	public void clearBars() {
+		this.IDBossBar = null;
+		this.MemBossBar = null;
+	}
 	public void setBarBool(Boolean bool) {
 		this.BarBool = bool;
 	}

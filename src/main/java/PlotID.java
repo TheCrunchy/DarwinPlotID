@@ -143,7 +143,7 @@ import org.spongepowered.api.entity.living.player.User;
 		CommandSpec toggle = CommandSpec.builder()
 				.description(Text.of("Toggle main command"))
 				.permission("DarwinPlotID.Toggle")
-				.child(plotidtoggle, "id")   	  
+				.child(plotidtoggle, "id", "bar")   	  
 				.child(plotmemtoggle, "member")
 				.build();
 		public class TogglePlotID implements CommandExecutor {
@@ -228,6 +228,7 @@ import org.spongepowered.api.entity.living.player.User;
 		    	    	   ServerBossBar oldBar2 = barP.getMemBar();
 				    	   oldBar2.removePlayer(player);
 		    	    	   }
+		    	    	   barP.setLastPlot("");
 		    	    	   allPlayers.put(player.getUniqueId(), barP);
 	    		}
 	    	}
@@ -285,13 +286,49 @@ import org.spongepowered.api.entity.living.player.User;
 		    	    	   ServerBossBar oldBar2 = barP.getMemBar();
 				    	   oldBar2.removePlayer(player);
 		    	    	   }
+		    	    	   barP.setLastPlot("");
 		    	    	   allPlayers.put(player.getUniqueId(), barP);
 					
 					return;
 				}
 				String worldname = plot.getWorldName();
-	    		HashSet<UUID> trusted = PlotPlayer.wrap(player).getCurrentPlot().getTrusted();
-	    		com.google.common.base.Optional<String> description = PlotPlayer.wrap(player).getCurrentPlot().getFlag(Flags.DESCRIPTION);
+	    		HashSet<UUID> trusted = plot.getTrusted();
+	    		Object[] trustedArray = trusted.toArray();
+	    		String firstTrusted = null, secondTrusted = null, thirdTrusted = null;
+	    		int somenumber = 0;
+	    		if (trustedArray.length > 0 && trustedArray[0] != null) {
+	    			if (getUser(UUID.fromString(trustedArray[0].toString())).isPresent()) {
+		    			firstTrusted = getUser(UUID.fromString(trustedArray[0].toString())).get().getName();
+		    			somenumber += 1;
+		    		//	System.out.println(firstTrusted);
+	    			}
+	    		}
+	       		if (trustedArray.length > 1 && trustedArray[1] != null) {
+	       			if (getUser(UUID.fromString(trustedArray[1].toString())).isPresent()) {
+	       				secondTrusted = getUser(UUID.fromString(trustedArray[1].toString())).get().getName();
+	       				somenumber += 1;
+	       				//System.out.println(secondTrusted);
+	       			}
+	       			
+	    		}
+	    		String members = null;
+	    		Boolean hasmembers = false;
+	    		if (firstTrusted != null) {
+	    			hasmembers = true;
+	    			members = firstTrusted;
+	    		}
+	    		if (somenumber == 2) {
+	    			if (trusted.size() > 2) {
+	    				members = firstTrusted + ", " + secondTrusted + " and " + (trusted.size() - 2) + " others";
+	    			}
+	    			else {
+		    			members = firstTrusted + ", " + secondTrusted;
+	    			}
+	    		}
+
+	    		if (trusted.contains("*")) {
+	    			members = "Everyone";
+	    		}
 	    		Text IDM = Text.of(TextColors.DARK_AQUA, "Plot ID : ", TextColors.AQUA, worldname,";", TextColors.AQUA, ID, TextColors.WHITE ," |-=-| ");
 	    		Text OwnerName = Text.of(TextColors.DARK_AQUA,"Owner : ",TextColors.AQUA, actualowner);
 	    		
@@ -310,13 +347,14 @@ import org.spongepowered.api.entity.living.player.User;
 	    	                .build();
 	    	       bossBarB = ServerBossBar.builder()
 	    	               .name(Text.of(
-	    	                  TextColors.DARK_AQUA, Text.of(TextColors.DARK_AQUA, "Members : ", TextColors.AQUA, trusted.size())
+	    	            		   TextColors.DARK_AQUA, Text.of(TextColors.DARK_AQUA, "Members : ", TextColors.AQUA, members)
 	    	              ))
 	    	               .percent(1f)
 	    	               .color(BossBarColors.BLUE)
 	    	              .overlay(BossBarOverlays.PROGRESS)
 	    	               .build();
-	    	       if (barP.getIDBar() != null) {
+	    	       if (!barP.getLastPlot().equals(worldname + ";" + plot.getId())) {
+	    	    	 //  System.out.println("Updating");
 	    	    	    barP.setLastPlot(worldname + plot.getId().toString());
 	    	    	   if (plot.getFlag(Flags.PRICE).isPresent()) {
 	    	    		   if (!barP.hasPlotTime) {
@@ -338,31 +376,22 @@ import org.spongepowered.api.entity.living.player.User;
 	    	    	   ServerBossBar oldBar2 = barP.getMemBar();
 			    	   oldBar2.removePlayer(player);
 	    	    	   }
-	    	    	   barP.setIDBar(bossBarA);
+	    	    	
 	    	    	   bossBarA.addPlayer(player);
-	    	    	   if (!barP.getMembersBool()) {
-		    	       barP.setMemBar(bossBarB);
+	    	    	   barP.setIDBar(bossBarA);
+	    	    	   if (!barP.getMembersBool() && trusted.size() > 0) {
 		    	       bossBarB.addPlayer(player);
+		    	       barP.setMemBar(bossBarB);
+		    	       barP.setLastPlot(worldname + ";" + plot.getId());
 	    	    	   }
 		    	       allPlayers.put(player.getUniqueId(), barP);
 	    	       }
 	    	       else {
-	    	    	   if (barP.getIDBar() != null) {
-		     	    	   ServerBossBar oldBar1 = barP.getIDBar();
-		     	    	  oldBar1.removePlayer(player);
-		    	    	   }
-		    	    	   if (barP.getMemBar() != null) {
-		    	    	   ServerBossBar oldBar2 = barP.getMemBar();
-				    	   oldBar2.removePlayer(player);
-		    	    	   }
-		    	    	   barP.setIDBar(bossBarA);
-		    	    	   bossBarA.addPlayer(player);
-		    	    	   if (!barP.getMembersBool()) {
-			    	       barP.setMemBar(bossBarB);
-			    	       bossBarB.addPlayer(player);
-		    	    	   }
-		    	    	   allPlayers.put(player.getUniqueId(), barP);
+	    	    	   if (bossBarA != barP.getIDBar()) {
+	    	    		   barP.setLastPlot(worldname + ";" + plot.getId());
+	    	    		     allPlayers.put(player.getUniqueId(), barP);
+	    	    	   }
 	    	       }
-	    	}
+	}
 	}
 	}
