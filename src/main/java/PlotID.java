@@ -1,6 +1,4 @@
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -10,24 +8,15 @@ import org.spongepowered.api.Sponge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.Optional;
-import java.util.Set;
-import org.spongepowered.api.boss.BossBarColors;
-import org.spongepowered.api.boss.BossBarOverlays;
-import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
-import com.intellectualcrafters.plot.flag.Flags;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.PlotPlayer;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -49,11 +38,7 @@ import org.spongepowered.api.entity.living.player.User;
 	public class PlotID {
 	    @Listener
 	    public void onServerFinishLoad(GameStartedServerEvent event) {
-
-		// Hey! The server has started!
-	        // Try instantiating your logger in here.
-	        // (There's a guide for that)
-	    	Sponge.getEventManager().registerListeners(this, new moveEvent());
+	    	Sponge.getEventManager().registerListeners(this, new moveEvents());
 	    	Sponge.getCommandManager().register(this, toggle, "toggle");
 	    	plugin = this;
 	    }
