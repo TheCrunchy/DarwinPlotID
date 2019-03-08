@@ -11,7 +11,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class toggles {
+public class ToggleExecutors {
 	
 	public static class TogglePlotID implements CommandExecutor {
 		private Path root;
