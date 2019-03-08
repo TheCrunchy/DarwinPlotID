@@ -113,12 +113,12 @@ import org.spongepowered.api.entity.living.player.User;
 	    CommandSpec plotmemtoggle = CommandSpec.builder()
 	    	    .description(Text.of("Toggle for Plot members"))
 	    	    .permission("DarwinPlotID.Toggle")
-	    	    .executor(new ToggleExecutors.TogglePlotMembers(root))
+	    	    .executor(new toggles.TogglePlotMembers(root))
 	    	    .build();
 	    CommandSpec plotidtoggle = CommandSpec.builder()
 	    	    .description(Text.of("Toggle for Plot ID"))
 	    	    .permission("DarwinPlotID.Toggle")
-	    	    .executor(new ToggleExecutors.TogglePlotID(root))
+	    	    .executor(new toggles.TogglePlotID(root))
 	    	    .build();
 	    
 		CommandSpec toggle = CommandSpec.builder()
