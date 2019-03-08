@@ -1,16 +1,33 @@
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.Sponge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.Optional;
+import java.util.Set;
+import org.spongepowered.api.boss.BossBarColors;
+import org.spongepowered.api.boss.BossBarOverlays;
+import org.spongepowered.api.boss.ServerBossBar;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import com.intellectualcrafters.plot.flag.Flags;
+import com.intellectualcrafters.plot.object.Plot;
+import com.intellectualcrafters.plot.object.PlotId;
+import com.intellectualcrafters.plot.object.PlotPlayer;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -25,6 +42,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 
 	@Plugin(id = "plotidbossbar", name = "Darwin PlotID boss bar", version = "1.0", description = "Plot ID boss bar")
@@ -59,7 +77,7 @@ import org.spongepowered.api.entity.living.player.User;
                 toggledMembers = (ArrayList<UUID>) toggled.getToggledMem();
             }
 	    }
-        public static void saveConfig(RootConfig config, Path path) {
+        private void saveConfig(RootConfig config, Path path) {
             try {
                 if (!path.toFile().getParentFile().exists()) {
                     Files.createDirectories(path.toFile().getParentFile().toPath());
@@ -93,6 +111,7 @@ import org.spongepowered.api.entity.living.player.User;
         @ConfigDir(sharedRoot = false)
         private Path root;
 
+
         @Inject
         @DefaultConfig(sharedRoot = false)
         private ConfigurationLoader<CommentedConfigurationNode> configManager;
@@ -113,12 +132,12 @@ import org.spongepowered.api.entity.living.player.User;
 	    CommandSpec plotmemtoggle = CommandSpec.builder()
 	    	    .description(Text.of("Toggle for Plot members"))
 	    	    .permission("DarwinPlotID.Toggle")
-	    	    .executor(new toggles.TogglePlotMembers(root))
+	    	    .executor(new TogglePlotMembers())
 	    	    .build();
 	    CommandSpec plotidtoggle = CommandSpec.builder()
 	    	    .description(Text.of("Toggle for Plot ID"))
 	    	    .permission("DarwinPlotID.Toggle")
-	    	    .executor(new toggles.TogglePlotID(root))
+	    	    .executor(new TogglePlotID())
 	    	    .build();
 	    
 		CommandSpec toggle = CommandSpec.builder()
@@ -127,5 +146,58 @@ import org.spongepowered.api.entity.living.player.User;
 				.child(plotidtoggle, "id", "bar")   	  
 				.child(plotmemtoggle, "member")
 				.build();
+		public class TogglePlotID implements CommandExecutor {
+		    @Override
+		    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+		    	Player player = (Player) src;
+		    	 File file = new File(root.toFile(), "toggled.conf");
+		    	 BarPlayer barP = new BarPlayer(player);
+		    	if (toggledID.contains(player.getUniqueId())){
+		    	toggledID.remove(player.getUniqueId());
+		    	player.sendMessage(Text.of(TextColors.WHITE , "Updating PlotID Bar Preference to ", TextColors.RED, "on"));
+		    	barP.setBarBool(false);
+		        }
+		    	else {
+		    		toggledID.add(player.getUniqueId());
+			    	player.sendMessage(Text.of(TextColors.WHITE , "Updating PlotID Bar Preference to ", TextColors.RED, "off"));
+			    	barP.setBarBool(true);
+		    	}
+		    	  allPlayers.put(player.getUniqueId(), barP);
+	            Toggled toggled = new Toggled();
+	            RootConfig config = new RootConfig();
+	            toggled.setToggledID(toggledID);
+	            toggled.setToggledMem(toggledMembers);
+	            config.getCategories().add(toggled);
+	            saveConfig(config, file.toPath());
+		     return CommandResult.success();
+		    }
+		}
 		
+
+		public class TogglePlotMembers implements CommandExecutor {
+		    @Override
+		    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+		    	File file = new File(root.toFile(), "toggled.conf");
+		    	Player player = (Player) src;
+		    	BarPlayer barP = new BarPlayer(player);
+		    	if (toggledMembers.contains(player.getUniqueId())){
+		    	toggledMembers.remove(player.getUniqueId());
+		    	player.sendMessage(Text.of(TextColors.WHITE , "Updating PlotID Members Preference to ", TextColors.RED, "on"));
+		    	barP.setMembersBool(false);
+		        }
+		    	else {
+		    		toggledMembers.add(player.getUniqueId());
+			    	player.sendMessage(Text.of(TextColors.WHITE , "Updating PlotID Members Preference to ", TextColors.RED, "off"));
+			    	barP.setMembersBool(true);
+		    	}
+		    	  allPlayers.put(player.getUniqueId(), barP);
+	            Toggled toggled = new Toggled();
+	            RootConfig config = new RootConfig();
+	            toggled.setToggledID(toggledID);
+	            toggled.setToggledMem(toggledMembers);
+	            config.getCategories().add(toggled);
+	            saveConfig(config, file.toPath());
+		     return CommandResult.success();
+		    }
+		}
 }
