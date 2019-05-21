@@ -46,7 +46,7 @@ public class BarPlayer {
 		return MembersBool;
 	}
 	
-	private String lastPlot = "";
+	private String lastPlot;
 	public void setLastPlot(String string) {
 		this.lastPlot = string;
 	}
@@ -63,7 +63,15 @@ public class BarPlayer {
 	public boolean getPlotTime() {
 		return hasPlotTime;
 	}
+	public Player player;
 	
+	public void setPlayer(Player player) {
+		this.player = player;
+		
+	}
+	public Player getPlayer() {
+		return this.player;
+	}
 	public BarPlayer(Player player) {
 
 		if (PlotID.allPlayers.containsKey(player.getUniqueId())) {
@@ -73,8 +81,10 @@ public class BarPlayer {
 		this.setMembersBool(PlotID.allPlayers.get(player.getUniqueId()).getMembersBool());
 		this.setLastPlot(PlotID.allPlayers.get(player.getUniqueId()).getLastPlot());
 		this.setPlotTime(PlotID.allPlayers.get(player.getUniqueId()).getPlotTime());
+		this.setPlayer(PlotID.allPlayers.get(player.getUniqueId()).getPlayer());
 		}
 		else {
+			this.setPlayer(player);
 			if (PlotID.toggledID.contains(player.getUniqueId())) {
 				this.setBarBool(true);
 			}

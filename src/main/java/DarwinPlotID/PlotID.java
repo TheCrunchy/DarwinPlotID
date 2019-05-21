@@ -2,6 +2,7 @@ package DarwinPlotID;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -10,6 +11,8 @@ import org.spongepowered.api.Sponge;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.Optional;
 import org.spongepowered.api.command.CommandException;
@@ -22,7 +25,12 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
+
 import com.google.inject.Inject;
+
+import me.rojo8399.placeholderapi.PlaceholderService;
+
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 
@@ -41,15 +49,22 @@ import org.spongepowered.api.entity.living.player.User;
 	    public void onServerFinishLoad(GameStartedServerEvent event) {
 	    	Sponge.getEventManager().registerListeners(this, new moveEvents());
 	    	Sponge.getCommandManager().register(this, toggle, "toggle");
+	    	placeholder = Sponge.getServiceManager().provideUnchecked(PlaceholderService.class);
 	    	plugin = this;
 	    }
+	    public static PlaceholderService placeholder;
 	    Object plugin;
 	    public static ArrayList <UUID> toggledID = new ArrayList<>();
 	    public static ArrayList <UUID> toggledMembers = new ArrayList<>();
 		public static  HashMap<UUID, BarPlayer> allPlayers = new HashMap<>();
 	    @Listener
 	    public void onServerStart(GameStartedServerEvent event) {
+			Task removeOffline = Task.builder().execute(new clearOfflines())
+		            .delayTicks(1)
+		            .interval(1, TimeUnit.MINUTES)
+		            .name("Remove offline players from my map").submit(this);
 	        File file = new File(root.toFile(), "toggled.conf");
+	        
 	        if (!file.exists()) {
 	            Toggled toggled = new Toggled();
 	            toggled.setName("Toggled people");
@@ -87,7 +102,22 @@ import org.spongepowered.api.entity.living.player.User;
                 throw new RuntimeException("Could not load file " + path, e);
             }
         }
-        
+		public class clearOfflines implements Runnable {
+			public void run() {
+				ArrayList <Player> offlinePlayers = new ArrayList<Player>();
+				Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.DARK_PURPLE, "Clearing offline players from PlotID maps"));
+				for (Entry<UUID, BarPlayer> barP : allPlayers.entrySet()) {
+					if (!barP.getValue().getPlayer().isOnline()) {
+						offlinePlayers.add(barP.getValue().getPlayer());
+					}
+				}
+				for (Player player : offlinePlayers) {
+					allPlayers.remove(player.getUniqueId());
+					Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.DARK_PURPLE, "Clearing ", player.getName()));
+				}
+				offlinePlayers.clear();
+			}
+			}
         private RootConfig rootConfig;
         
         @Inject

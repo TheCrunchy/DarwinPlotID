@@ -11,6 +11,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -19,7 +20,11 @@ import com.intellectualcrafters.plot.object.Plot;
 import com.intellectualcrafters.plot.object.PlotId;
 
 public class moveEvents {
-	
+	@Listener
+	public void onMove(ClientConnectionEvent.Join event, @First Player player2) { 
+		checkLogin(event, player2);
+	}
+
 	@Listener
 	public void onMove(MoveEntityEvent event, @First Player player2) { 
 		check(event, player2);
@@ -29,6 +34,49 @@ public class moveEvents {
 	public void onTeleport(MoveEntityEvent.Teleport event, @First Player player2) { 
 		check(event, player2);
 
+	}
+	private void checkLogin(ClientConnectionEvent.Join event, Player player) {
+		com.intellectualcrafters.plot.object.Location loc = new com.intellectualcrafters.plot.object.Location();
+		loc.setX(event.getTargetEntity().getTransform().getLocation().getBlockX());
+		loc.setY(event.getTargetEntity().getTransform().getLocation().getBlockY());
+		loc.setZ(event.getTargetEntity().getTransform().getLocation().getBlockZ());
+		loc.setWorld(event.getTargetEntity().getTransform().getLocation().getExtent().getName().toString());
+		if (Plot.getPlot(loc) != null) {
+			BarPlayer barP = new BarPlayer(player);
+			
+			Plot plot = Plot.getPlot(loc);
+			if (barP.getIDBar() != null) {
+				ServerBossBar oldBar1 = barP.getIDBar();
+				oldBar1.removePlayer(player);
+				barP.setIDBar(null);
+			}
+			if (barP.getMemBar() != null) {
+				ServerBossBar oldBar2 = barP.getMemBar();
+				barP.setMemBar(null);
+				oldBar2.removePlayer(player);
+			}
+			barP.setLastPlot("");
+			PlotID.allPlayers.put(player.getUniqueId(), barP);
+			doBar(plot, player);	
+		}
+		else {
+			BarPlayer barP = new BarPlayer(player);
+			if (barP.hasPlotTime) {
+				Sponge.getCommandManager().process(player, "ptime reset");
+				barP.setPlotTime(false);
+			}
+			if (barP.getIDBar() != null) {
+				ServerBossBar oldBar1 = barP.getIDBar();
+				oldBar1.removePlayer(player);
+			}
+			if (barP.getMemBar() != null) {
+				ServerBossBar oldBar2 = barP.getMemBar();
+				oldBar2.removePlayer(player);
+			}
+			barP.setLastPlot("");
+			PlotID.allPlayers.put(player.getUniqueId(), barP);
+			
+		}
 	}
 	private void check(MoveEntityEvent event, Player player) {
 		com.intellectualcrafters.plot.object.Location loc = new com.intellectualcrafters.plot.object.Location();
@@ -110,6 +158,7 @@ public class moveEvents {
 		}
 		String worldname = plot.getWorldName();
 		HashSet<UUID> trusted = plot.getTrusted();
+	
 		Object[] trustedArray = trusted.toArray();
 		String firstTrusted = null, secondTrusted = null, thirdTrusted = null;
 		int somenumber = 0;
@@ -146,6 +195,7 @@ public class moveEvents {
 		if (trusted.contains("*")) {
 			members = "Everyone";
 		}
+		//Text rank = Text.of(TextColors.WHITE," |-=-| ", TextColors.DARK_AQUA, "Rank : ", TextColors.AQUA, PlotID.placeholder.replaceSourcePlaceholders("%rank_name%", PlotID.getUser(owner.iterator().next()).get()));
 		Text IDM = Text.of(TextColors.DARK_AQUA, "Plot ID : ", TextColors.AQUA, worldname,";", TextColors.AQUA, ID, TextColors.WHITE ," |-=-| ");
 		Text OwnerName = Text.of(TextColors.DARK_AQUA,"Owner : ",TextColors.AQUA, actualowner);
 
@@ -156,7 +206,7 @@ public class moveEvents {
 
 		bossBarA = ServerBossBar.builder()
 				.name(Text.of(
-						TextColors.DARK_AQUA, IDM, OwnerName
+						TextColors.DARK_AQUA, IDM, OwnerName//, rank
 						))
 				.percent(1f)
 				.color(BossBarColors.WHITE)
@@ -170,8 +220,12 @@ public class moveEvents {
 				.color(BossBarColors.BLUE)
 				.overlay(BossBarOverlays.PROGRESS)
 				.build();
-		if (!barP.getLastPlot().equals(worldname + ";" + plot.getId())) {
-			//  System.out.println("Updating");
+
+		//System.out.println("BARPLAYER " + barP.getLastPlot());
+		//System.out.println("WORLDNAME " + worldname + ";" + plot.getId());
+		if (!barP.getLastPlot().equals(worldname + plot.getId())) {
+			  //System.out.println("Updating");
+			  
 			barP.setLastPlot(worldname + plot.getId().toString());
 			if (plot.getFlag(Flags.PRICE).isPresent()) {
 				if (!barP.hasPlotTime) {
@@ -199,13 +253,13 @@ public class moveEvents {
 			if (!barP.getMembersBool() && trusted.size() > 0) {
 				bossBarB.addPlayer(player);
 				barP.setMemBar(bossBarB);
-				barP.setLastPlot(worldname + ";" + plot.getId());
+				barP.setLastPlot(worldname + plot.getId());
 			}
 			PlotID.allPlayers.put(player.getUniqueId(), barP);
 		}
 		else {
 			if (bossBarA != barP.getIDBar()) {
-				barP.setLastPlot(worldname + ";" + plot.getId());
+				barP.setLastPlot(worldname + plot.getId());
 				PlotID.allPlayers.put(player.getUniqueId(), barP);
 			}
 		}

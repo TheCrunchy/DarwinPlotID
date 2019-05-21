@@ -5,5 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
 	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/spongeapi-7.1.0-20180820.174752-54-shaded.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/PlotSquared-Sponge-18.07.27-cd9d22c-2026 (1).jar"/>
+	<classpathentry kind="lib" path="C:/Users/Cameron/Documents/Local testing/PlaceholderAPI-4.4 (1).jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
